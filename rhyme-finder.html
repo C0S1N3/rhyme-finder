@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>押韵词典 · RHYME DICTIONARY</title>
+<style>
+  @font-face {
+    font-family: 'Boldonse';
+    src: url('./_shared/fonts/Boldonse-Regular.ttf') format('truetype');
+    font-weight: 400 700; font-display: swap;
+  }
+  @font-face {
+    font-family: 'BigShoulders';
+    src: url('./_shared/fonts/BigShoulders-Bold.ttf') format('truetype');
+    font-weight: 700; font-display: swap;
+  }
+  @font-face {
+    font-family: 'HandTag';
+    src: url('./_shared/fonts/NothingYouCouldDo-Regular.ttf') format('truetype');
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: 'JetBrainsMono';
+    src: url('./_shared/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+    font-weight: 400; font-display: swap;
+  }
+
+  :root {
+    --bg: #14110d;
+    --bg2: #1d1913;
+    --bg3: #2a241b;
+    --ink: #f6f1e6;
+    --muted: #a8977e;
+    --rule: rgba(246, 241, 230, 0.16);
+    --accent: #ffd23f;
+    --accent-soft: rgba(255, 210, 63, 0.13);
+    --accent2: #d9c9ad;
+    --hot: #ff4d2e;
+    --ok: #9fd356;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --shadow: 6px 6px 0 rgba(0, 0, 0, 0.55);
+    --shadow-acid: 5px 5px 0 var(--hot);
+    --font-disp: 'Boldonse', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --font-cond: 'BigShoulders', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --font-cn: 'InstrumentSans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Source Han Sans SC', sans-serif;
+    --font-mono: 'JetBrainsMono', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background:
+      radial-gradient(1100px 520px at 88% -12%, rgba(255, 77, 46, 0.16), transparent 62%),
+      radial-gradient(900px 480px at -12% 24%, rgba(255, 210, 63, 0.10), transparent 60%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--font-cn);
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+    position: relative;
+  }
+  /* 噪点颗粒 */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: radial-gradient(rgba(246, 241, 230, 0.05) 1px, transparent 1px);
+    background-size: 5px 5px;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 72px; position: relative; z-index: 1; }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 36px 0 20px; gap: 20px;
+  }
+  .brand h1 {
+    font-family: var(--font-disp);
+    font-size: clamp(38px, 6.2vw, 62px);
+    line-height: 1.06;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    text-shadow: 4px 4px 0 var(--hot), 8px 8px 0 rgba(0, 0, 0, 0.45);
+  }
+  .brand h1 .acid { color: var(--accent); }
+  .brand .kicker {
+    display: inline-block;
+    font-family: var(--font-cond);
+    font-size: 14px; letter-spacing: 0.42em;
+    color: var(--bg); background: var(--accent);
+    padding: 4px 14px 3px; margin-bottom: 14px;
+    transform: rotate(-1.6deg);
+    box-shadow: var(--shadow);
+    text-transform: uppercase;
+  }
+  .brand .tagline {
+    font-family: 'HandTag', var(--font-cn);
+    font-size: 17px; color: var(--accent2);
+    margin-top: 12px;
+  }
+  .head-sticker {
+    flex: none;
+    width: 118px; height: 118px; border-radius: 50%;
+    border: 3px solid var(--accent);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transform: rotate(8deg);
+    background: var(--bg2);
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .head-sticker b {
+    font-family: var(--font-disp); font-size: 22px; color: var(--accent); line-height: 1.2;
+  }
+  .head-sticker span {
+    font-family: var(--font-cond); font-size: 11px; letter-spacing: 0.22em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  /* ---------- Marquee ---------- */
+  .marquee {
+    overflow: hidden; white-space: nowrap;
+    border-top: 2px solid var(--rule); border-bottom: 2px solid var(--rule);
+    background: var(--accent-soft);
+    padding: 9px 0; margin: 8px 0 26px;
+    font-family: var(--font-cond); font-size: 15px; letter-spacing: 0.34em;
+    color: var(--accent); text-transform: uppercase;
+  }
+  .marquee-inner { display: inline-block; animation: slide 26s linear infinite; }
+  @keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .marquee-inner { animation: none; } }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    background: var(--bg2);
+    border: 2px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px 28px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  /* ---------- Search ---------- */
+  .search-row { display: flex; gap: 14px; }
+  .search-box {
+    flex: 1; display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border: 2px solid var(--rule);
+    border-radius: 12px; padding: 0 18px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .search-box .icon { color: var(--accent); font-size: 20px; }
+  .search-box input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-family: var(--font-cn); font-size: 17px; color: var(--ink);
+    padding: 15px 0;
+  }
+  .search-box input::placeholder { color: var(--muted); opacity: .8; }
+  .btn-search {
+    border: none; cursor: pointer;
+    background: var(--accent); color: var(--bg);
+    font-family: var(--font-disp); font-size: 17px; letter-spacing: 0.16em;
+    padding: 0 38px; border-radius: 12px;
+    box-shadow: var(--shadow-acid);
+    transition: transform .12s, box-shadow .12s;
+  }
+  .btn-search:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--hot); }
+  .btn-search:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--hot); }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin-top: 16px; }
+  .row-label {
+    font-family: var(--font-cond); font-size: 12px; color: var(--muted);
+    letter-spacing: 0.28em; text-transform: uppercase; margin-right: 2px;
+  }
+  .chip {
+    border: 1.5px solid var(--rule); background: transparent;
+    color: var(--accent2); font-family: var(--font-cn); font-size: 13.5px;
+    padding: 6px 16px; border-radius: 999px; cursor: pointer;
+    transition: all .16s;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--bg); background: var(--accent); }
+  .chip-recent { color: var(--muted); border-style: dashed; }
+  .chip-clear { color: var(--muted); border-style: dashed; }
+
+  /* ---------- Options ---------- */
+  .opt-group { display: flex; align-items: flex-start; gap: 18px; padding: 14px 0; }
+  .opt-group + .opt-group { border-top: 1.5px dashed var(--rule); }
+  .opt-label {
+    width: 86px; flex: none; padding-top: 8px;
+    font-family: var(--font-cond); font-size: 14px; letter-spacing: 0.26em;
+    color: var(--accent); text-transform: uppercase; font-weight: 700;
+  }
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pill {
+    border: 2px solid var(--rule); background: transparent;
+    color: var(--ink); font-family: var(--font-cn); font-size: 14.5px; font-weight: 700;
+    padding: 8px 22px; border-radius: 999px; cursor: pointer;
+    transition: all .16s;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+  .pill.active {
+    border-color: var(--accent); background: var(--accent); color: var(--bg);
+    box-shadow: 4px 4px 0 var(--hot);
+    transform: translate(-1px, -1px);
+  }
+  .opt-desc { font-size: 12.5px; color: var(--muted); margin-top: 9px; line-height: 1.8; }
+
+  /* ---------- Results ---------- */
+  .meta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .meta-text { font-size: 15.5px; }
+  .meta-text .count {
+    font-family: var(--font-disp); color: var(--accent); font-size: 24px;
+    text-shadow: 2px 2px 0 var(--hot); padding: 0 4px;
+  }
+  .tags { display: inline-flex; gap: 7px; margin-left: 10px; vertical-align: 2px; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-cond); font-size: 12px; letter-spacing: 0.16em;
+    color: var(--accent); background: var(--accent-soft);
+    border: 1px solid var(--rule);
+    border-radius: 4px; padding: 3px 11px; text-transform: uppercase;
+  }
+  .meta-warn { color: var(--hot); }
+  .meta-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-ghost {
+    border: 2px solid var(--rule); background: transparent; color: var(--accent2);
+    font-family: var(--font-cn); font-size: 13.5px; font-weight: 700; padding: 8px 18px;
+    border-radius: 999px; cursor: pointer; transition: all .16s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .sort-select {
+    border: 2px solid var(--rule); background: var(--bg); color: var(--accent2);
+    font-family: var(--font-cn); font-size: 13.5px; padding: 8px 12px;
+    border-radius: 999px; cursor: pointer; outline: none;
+  }
+  .q-info { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .q-chip {
+    display: inline-flex; align-items: baseline; gap: 7px;
+    background: var(--bg); border: 1.5px solid var(--rule);
+    border-radius: var(--radius-sm); padding: 6px 14px;
+  }
+  .q-chip b { font-size: 16px; }
+  .q-chip i { font-style: normal; color: var(--accent); font-family: var(--font-mono); font-size: 13px; }
+  .q-chip em { font-style: normal; font-size: 11px; color: var(--muted); letter-spacing: 0.12em; }
+  .hint { font-size: 12.5px; color: var(--muted); }
+
+  .grid {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 13px;
+  }
+  .card {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: var(--bg); border: 2px solid var(--rule);
+    border-radius: var(--radius-sm); padding: 17px 10px 14px;
+    cursor: pointer; font-family: var(--font-cn);
+    transition: all .14s;
+  }
+  .card:hover {
+    border-color: var(--accent); background: var(--bg3);
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0 var(--hot);
+  }
+  .card-py {
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--muted);
+    letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; max-width: 100%;
+    text-overflow: ellipsis;
+  }
+  .card-word { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: 0.06em; }
+  .card-word mark { background: none; color: var(--accent); text-shadow: 1px 1px 0 var(--hot); }
+  .badge {
+    position: absolute; top: 7px; right: 8px;
+    font-family: var(--font-cond); font-size: 11px; letter-spacing: 0.12em;
+    color: var(--bg); background: var(--hot);
+    border-radius: 4px; padding: 1px 8px; font-weight: 700;
+    transform: rotate(3deg);
+  }
+
+  .empty { text-align: center; padding: 48px 10px 36px; }
+  .empty-title {
+    font-family: var(--font-disp); font-size: 20px; color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .empty-sub { font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+  .skeleton { display: flex; justify-content: center; gap: 10px; margin-top: 28px; }
+  .skeleton span {
+    width: 92px; height: 62px; border-radius: var(--radius-sm);
+    background: linear-gradient(100deg, var(--bg3) 40%, var(--accent-soft) 50%, var(--bg3) 60%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite linear;
+    border: 1.5px solid var(--rule);
+  }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+  /* ---------- Help ---------- */
+  .section-title {
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--font-disp); font-size: 21px; letter-spacing: 0.06em;
+    margin: 42px 0 18px;
+  }
+  .section-title .box {
+    background: var(--hot); color: var(--ink);
+    padding: 2px 12px; border-radius: 6px; transform: rotate(-1.2deg);
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+    font-size: 17px;
+  }
+  .help-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(236px, 1fr));
+    gap: 15px;
+  }
+  .help-card {
+    background: var(--bg2); border: 2px solid var(--rule);
+    border-radius: var(--radius); padding: 21px 23px;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+  }
+  .help-card h3 {
+    font-family: var(--font-cn); font-size: 15px; margin-bottom: 9px; color: var(--accent);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .help-card h3 .num {
+    width: 24px; height: 24px; flex: none; border-radius: 6px;
+    background: var(--hot); color: var(--ink);
+    font-family: var(--font-cond); font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .help-card p { font-size: 13.5px; color: var(--accent2); line-height: 1.9; }
+  .help-card code {
+    font-family: var(--font-mono); font-size: 12px;
+    background: var(--bg); border: 1px solid var(--rule);
+    border-radius: 5px; padding: 1px 7px; color: var(--accent);
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    margin-top: 48px; padding-top: 22px; border-top: 2px solid var(--rule);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    font-family: var(--font-cond); font-size: 13px; color: var(--muted);
+    letter-spacing: 0.22em; text-transform: uppercase;
+  }
+  footer .sig { font-family: 'HandTag', var(--font-cn); text-transform: none; letter-spacing: 0.02em; font-size: 15px; color: var(--accent2); }
+
+  /* ---------- Toast ---------- */
+  #toast {
+    position: fixed; left: 50%; bottom: 42px; transform: translate(-50%, 16px) rotate(-1deg);
+    background: var(--accent); color: var(--bg);
+    font-family: var(--font-cn); font-weight: 700; font-size: 14px;
+    padding: 12px 28px; border-radius: 10px;
+    border: 2px solid var(--bg);
+    opacity: 0; pointer-events: none; transition: all .22s;
+    box-shadow: 5px 5px 0 var(--hot); z-index: 50;
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0) rotate(-1deg); }
+
+  /* ---------- Responsive ---------- */
+  /* 平板 / 窄窗口 */
+  @media (max-width: 1024px) {
+    .wrap { padding: 0 22px 64px; }
+    header { padding: 30px 0 18px; }
+    .head-sticker { width: 102px; height: 102px; }
+    .head-sticker b { font-size: 19px; }
+    .panel { padding: 22px 22px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 11px; }
+    .opt-label { width: 78px; letter-spacing: 0.18em; }
+  }
+
+  /* 手机 */
+  @media (max-width: 720px) {
+    .wrap { padding: 0 15px 52px; }
+    header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 24px 0 14px; }
+    .brand h1 { text-shadow: 3px 3px 0 var(--hot), 6px 6px 0 rgba(0, 0, 0, 0.45); }
+    .brand .kicker { font-size: 12px; letter-spacing: 0.3em; margin-bottom: 10px; }
+    .brand .tagline { font-size: 15px; margin-top: 10px; }
+    .head-sticker {
+      position: absolute; top: 24px; right: 4px;
+      width: 84px; height: 84px; transform: rotate(8deg);
+    }
+    .head-sticker b { font-size: 15px; }
+    .head-sticker span { font-size: 9px; letter-spacing: 0.16em; }
+    .marquee { font-size: 13px; letter-spacing: 0.22em; margin-bottom: 20px; }
+    .panel { padding: 18px 16px; margin-bottom: 18px; }
+    .search-row { flex-direction: column; gap: 11px; }
+    .search-box input { font-size: 16px; padding: 13px 0; }
+    .btn-search { padding: 14px 0; letter-spacing: 0.5em; font-size: 15px; }
+    .chip { padding: 8px 15px; font-size: 13px; }
+    .opt-group { flex-direction: column; gap: 8px; padding: 12px 0; }
+    .opt-label { padding-top: 0; width: auto; font-size: 13px; letter-spacing: 0.22em; }
+    .pill { padding: 9px 17px; font-size: 13.5px; }
+    .opt-desc { font-size: 12px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 9px; }
+    .card { padding: 14px 8px 12px; }
+    .card-word { font-size: 19px; }
+    .meta-row { flex-direction: column; align-items: flex-start; }
+    .meta-actions { width: 100%; justify-content: space-between; }
+    .btn-ghost, .sort-select { padding: 10px 16px; font-size: 13px; }
+    .tags { margin-left: 0; margin-top: 4px; }
+    .section-title { font-size: 18px; margin: 32px 0 14px; }
+    .help-grid { grid-template-columns: 1fr; }
+    .skeleton span:nth-child(n+4) { display: none; }
+    footer { flex-direction: column; gap: 6px; letter-spacing: 0.16em; }
+    #toast { left: 16px; right: 16px; transform: translateY(16px) rotate(-1deg); text-align: center; }
+    #toast.show { transform: translateY(0) rotate(-1deg); }
+  }
+
+  /* 小屏手机 */
+  @media (max-width: 420px) {
+    .wrap { padding: 0 12px 44px; }
+    .brand h1 { font-size: 34px; }
+    .head-sticker { width: 72px; height: 72px; top: 20px; }
+    .head-sticker b { font-size: 13px; }
+    .pills { gap: 8px; }
+    .pill { padding: 8px 13px; font-size: 12.5px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 8px; }
+    .card-word { font-size: 17px; }
+    .card-py { font-size: 10.5px; }
+    .skeleton span { width: 76px; height: 54px; }
+    .skeleton span:nth-child(n+3) { display: none; }
+  }
+
+  @media print {
+    .search-row, .chip-row, .meta-actions, #toast, .marquee { display: none; }
+    body { background: #fff; color: #000; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <span class="kicker">Rhyme Dictionary · For MCs</span>
+      <h1>押韵<span class="acid">词典</span></h1>
+      <p class="tagline">找韵脚，写 punchline，先查词典。</p>
+    </div>
+    <div class="head-sticker">
+      <b>12000+</b>
+      <span>entries</span>
+    </div>
+  </header>
+
+  <div class="marquee">
+    <div class="marquee-inner">
+      RHYME&nbsp;&nbsp;·&nbsp;&nbsp;FLOW&nbsp;&nbsp;·&nbsp;&nbsp;PUNCHLINE&nbsp;&nbsp;·&nbsp;&nbsp;单押&nbsp;&nbsp;·&nbsp;&nbsp;双押&nbsp;&nbsp;·&nbsp;&nbsp;多押&nbsp;&nbsp;·&nbsp;&nbsp;尾音&nbsp;&nbsp;·&nbsp;&nbsp;全押&nbsp;&nbsp;·&nbsp;&nbsp;
+      RHYME&nbsp;&nbsp;·&nbsp;&nbsp;FLOW&nbsp;&nbsp;·&nbsp;&nbsp;PUNCHLINE&nbsp;&nbsp;·&nbsp;&nbsp;单押&nbsp;&nbsp;·&nbsp;&nbsp;双押&nbsp;&nbsp;·&nbsp;&nbsp;多押&nbsp;&nbsp;·&nbsp;&nbsp;尾音&nbsp;&nbsp;·&nbsp;&nbsp;全押&nbsp;&nbsp;·&nbsp;&nbsp;
+    </div>
+  </div>
+
+  <!-- 搜索 -->
+  <section class="panel">
+    <div class="search-row">
+      <div class="search-box">
+        <span class="icon">⌕</span>
+        <input id="searchInput" type="text" placeholder="输入中英文词语，寻找韵脚（例：天、时间、dream）" autocomplete="off">
+      </div>
+      <button class="btn-search" id="searchBtn">SEARCH</button>
+    </div>
+    <div class="chip-row" id="recentRow"></div>
+  </section>
+
+  <!-- 押韵选项 -->
+  <section class="panel">
+    <div class="opt-group">
+      <div class="opt-label">押韵字数</div>
+      <div>
+        <div class="pill-group" data-key="count">
+          <div class="pills">
+            <button class="pill active" data-val="1">单押</button>
+            <button class="pill" data-val="2">双押</button>
+            <button class="pill" data-val="3">三押</button>
+            <button class="pill" data-val="4">多押</button>
+            <button class="pill" data-val="mix">混押</button>
+          </div>
+          <div class="opt-desc">单押匹配最后一个字音；双押 / 三押 / 多押匹配末尾 2 / 3 / 4 个字音；混押自动匹配尽可能多的字音并标注押数。</div>
+        </div>
+      </div>
+    </div>
+    <div class="opt-group">
+      <div class="opt-label">押韵方式</div>
+      <div>
+        <div class="pill-group" data-key="mode">
+          <div class="pills">
+            <button class="pill active" data-val="tail">只押尾音</button>
+            <button class="pill" data-val="final">精准韵母</button>
+            <button class="pill" data-val="full">全押</button>
+          </div>
+          <div class="opt-desc">只押尾音：同十三辙韵部即可押（最宽松，如「天 tiān」押「年 nián」「远 yuǎn」）；精准韵母：韵母完全一致；全押：声母 + 韵母完全相同。</div>
+        </div>
+      </div>
+    </div>
+    <div class="opt-group">
+      <div class="opt-label">声调</div>
+      <div>
+        <div class="pill-group" data-key="tone">
+          <div class="pills">
+            <button class="pill active" data-val="loose">声调不限</button>
+            <button class="pill" data-val="strict">声调一致</button>
+          </div>
+          <div class="opt-desc">说唱中一般声调不限；做「完全押韵」时可开启声调一致。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 结果 -->
+  <section class="panel" id="resultPanel">
+    <div id="resultMeta"></div>
+    <div class="grid" id="results"></div>
+  </section>
+
+  <!-- 帮助 -->
+  <h2 class="section-title"><span class="box">HOW TO</span>功能说明</h2>
+  <div class="help-grid">
+    <div class="help-card">
+      <h3><span class="num">1</span>什么是单押 / 双押 / 多押</h3>
+      <p>指连续押韵的字音数量。<code>单押</code>只看最后一个字音，<code>双押</code>要求末尾两个字音都押（如「时间」↔「世间」），<code>三押</code>/<code>多押</code>依次类推。<code>混押</code>会自动匹配你能押上的最大长度，并在卡片右上角标注「2押」「3押」。</p>
+    </div>
+    <div class="help-card">
+      <h3><span class="num">2</span>只押尾音 vs 全押</h3>
+      <p><code>只押尾音</code>按十三辙韵部匹配，只要韵尾相近就算押（天 / 年 / 远 / 现），韵脚池最大；<code>精准韵母</code>要求韵母逐字相同；<code>全押</code>要求声母 + 韵母完全一致，最严格，适合「完全韵」。</p>
+    </div>
+    <div class="help-card">
+      <h3><span class="num">3</span>声调怎么选</h3>
+      <p>中文说唱通常<code>声调不限</code>——靠节奏和韵尾就能成立；如果你写的是古风、旋律说唱或需要「同音韵」效果，可以开启<code>声调一致</code>让听感更整齐。</p>
+    </div>
+    <div class="help-card">
+      <h3><span class="num">4</span>小技巧</h3>
+      <p>输入的词越长，能查到的双押 / 三押结果越准；点击任意韵脚卡片即可复制；「复制全部」一次带走整批词；英文单词按词尾发音匹配（如 <code>night</code> 押 <code>light</code> <code>fight</code>）。</p>
+    </div>
+  </div>
+
+  <footer>
+    <span>押韵词典 · 本地离线词库 · 12,000+ 词条</span>
+    <span class="sig">keep the flow alive ✦</span>
+    <span>韵部划分：中华十三辙</span>
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script src="./assets/data.js"></script>
+<script src="./assets/app.js"></script>
+</body>
+</html>
